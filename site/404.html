@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Page not found – Tom Cox</title>
+  <meta name="robots" content="noindex">
+  <!-- GitHub Pages serves this file at any missing URL, so asset paths must be absolute -->
+  <link rel="icon" href="/assets/images/favicon.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.bunny.net">
+  <link rel="stylesheet" href="https://fonts.bunny.net/css?family=ibm-plex-serif:400,600|inter:400,500,600&display=swap">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <script>document.documentElement.classList.add("js");</script>
+  <script src="/assets/js/main.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <nav class="site-nav" id="site-nav" aria-label="Main">
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="/contact/">Contact</a></li>
+        </ul>
+      </nav>
+      <a class="site-logo" href="/">Tom Cox</a>
+      <div class="header-actions">
+        <a class="button button-small" href="https://tomcox.substack.com/subscribe">Subscribe</a>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Open menu">
+          <svg class="icon-open" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+          <svg class="icon-close" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main" class="container not-found">
+    <p class="eyebrow">Page not found</p>
+    <h1 class="page-title">Looking for an old post?</h1>
+    <p class="page-lede">Tom's writing has moved to Substack, so links to older posts on this site no longer work. Many of them can be found in the Substack archive.</p>
+    <div class="button-row">
+      <a class="button" id="substack-guess" href="https://tomcox.substack.com/archive" hidden>Try this post on Substack</a>
+      <a class="button button-outline" href="https://tomcox.substack.com/archive">Browse the archive</a>
+      <a class="link-arrow" href="/">Go to the homepage</a>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <a class="site-logo" href="/">Tom Cox</a>
+        <p>New writing by bestselling author Tom Cox.</p>
+      </div>
+      <nav class="footer-nav" aria-label="Footer">
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/about/">About</a></li>
+          <li><a href="/contact/">Contact</a></li>
+          <li><a href="https://tomcox.substack.com">Substack</a></li>
+        </ul>
+      </nav>
+      <a class="button" href="https://tomcox.substack.com/subscribe">Subscribe on Substack</a>
+    </div>
+    <div class="container">
+      <p class="footer-bottom">© <span data-year>2026</span> Tom Cox</p>
+    </div>
+  </footer>
+
+  <script>
+    // Old Ghost posts lived at /<slug>/. Some kept the same slug on Substack (/p/<slug>),
+    // so offer that as a first guess. It isn't guaranteed to exist.
+    (function () {
+      var slug = location.pathname.replace(/^\/+|\/+$/g, "");
+      if (/^[a-z0-9-]+$/i.test(slug)) {
+        var link = document.getElementById("substack-guess");
+        link.href = "https://tomcox.substack.com/p/" + slug;
+        link.hidden = false;
+      }
+    })();
+  </script>
+</body>
+</html>
