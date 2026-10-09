@@ -3,9 +3,6 @@ name: Build and deploy
 on:
   push:
     branches: [main]
-  # Refresh the latest Substack posts every hour
-  schedule:
-    - cron: "17 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -20,44 +17,18 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    outputs:
-      changed: ${{ steps.compare.outputs.changed }}
     steps:
       - uses: actions/checkout@v5
 
-      - name: Fetch latest Substack posts
-        run: python3 scripts/fetch_posts.py
+      - uses: actions/configure-pages@v5
 
-      - id: pages
-        uses: actions/configure-pages@v5
-
-      # Scheduled runs only deploy when the posts differ from the live site, so the
-      # hourly check doesn't upload an artifact every time. Pushes and manual runs
-      # always deploy. If the live file can't be fetched, deploy anyway.
-      - name: Compare posts with the live site
-        id: compare
-        run: |
-          if [ "$GITHUB_EVENT_NAME" != "schedule" ]; then
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          elif curl -fsSL "$BASE_URL/data/posts.json?t=$(date +%s)" -o "$RUNNER_TEMP/live.json" &&
-               diff -q <(jq -S .posts "$RUNNER_TEMP/live.json") <(jq -S .posts site/data/posts.json) > /dev/null; then
-            echo "No new posts, skipping deploy"
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          fi
-        env:
-          BASE_URL: ${{ steps.pages.outputs.base_url }}
-
-      - if: steps.compare.outputs.changed == 'true'
-        uses: actions/upload-pages-artifact@v4
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: site
           retention-days: 1
 
   deploy:
     needs: build
-    if: needs.build.outputs.changed == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages

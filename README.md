@@ -20,27 +20,23 @@ site/                    Everything that gets published
   assets/css/style.css
   assets/js/main.js      Mobile menu, latest posts, contact form
   assets/images/
-  data/posts.json        Latest posts, generated from the Substack feed
-scripts/fetch_posts.py   Builds data/posts.json from the Substack RSS feed
+  data/posts.json        Fallback snapshot of the latest posts
+scripts/fetch_posts.py   Refreshes data/posts.json from the Substack RSS feed (run locally)
 .github/workflows/deploy.yml
 ```
 
 ## How the latest posts work
 
-Substack's RSS feed can't be read directly from the browser (no CORS headers). So the deploy workflow runs `scripts/fetch_posts.py`, which turns the feed into `site/data/posts.json`, and the homepage renders from that file.
+Substack's feed can't be read from the browser (no CORS headers), and Substack blocks requests from GitHub Actions. So the homepage reads posts from a small Cloudflare Worker, [`cloudlfare-worker-tom-cox`](https://cloudlfare-worker-tom-cox.matt-422.workers.dev), which lives in its own repo. The Worker fetches Substack's JSON API (falling back to the RSS feed) and returns the posts as JSON. Responses are cached for 5 minutes, so a new Substack post shows up on the site within about 5 minutes.
 
-The workflow runs on every push to `main`, **every hour**, and on demand (Actions → Build and deploy → Run workflow). A new Substack post shows up on the site within about an hour.
+If the Worker is down, the homepage falls back to `site/data/posts.json`, a snapshot committed to this repo. To refresh it, run `python3 scripts/fetch_posts.py` locally and commit the result (it can't run in GitHub Actions because Substack blocks it). If both fail, the homepage shows a link to Substack.
 
-The hourly run checks the posts against the live site's `posts.json` and only deploys if they've changed. Quiet hours upload no artifact. Pushes and manual runs always deploy. Each Pages artifact expires after 1 day.
-
-If Substack is unreachable, the script keeps the existing `posts.json`, so a deploy never fails because of it. The committed `posts.json` is a snapshot for local preview.
-
-> GitHub pauses scheduled workflows in repos with no commits for 60 days. If posts stop updating, re-enable the workflow from the Actions tab.
+The Worker URL is set in the `data-src` attribute of the posts section in `site/index.html`.
 
 ## Local preview
 
 ```sh
-python3 scripts/fetch_posts.py        # optional: refresh posts.json
+python3 scripts/fetch_posts.py        # optional: refresh the fallback posts.json
 python3 -m http.server 8000 -d site
 ```
 

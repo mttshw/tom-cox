@@ -90,19 +90,32 @@
     if (!container) return;
 
     var src = container.getAttribute("data-src");
+    var fallback = container.getAttribute("data-fallback");
     var limit = parseInt(container.getAttribute("data-limit"), 10) || 7;
 
-    fetch(src, { cache: "no-cache" })
-      .then(function (response) {
-        if (!response.ok) throw new Error("HTTP " + response.status);
-        return response.json();
-      })
-      .then(function (data) {
-        var posts = (data && Array.isArray(data.posts) ? data.posts : []).filter(function (post) {
-          return post && post.title && safeUrl(post.url);
+    function load(url) {
+      return fetch(url, { cache: "no-cache" })
+        .then(function (response) {
+          if (!response.ok) throw new Error("HTTP " + response.status);
+          return response.json();
+        })
+        .then(function (data) {
+          var posts = (data && Array.isArray(data.posts) ? data.posts : []).filter(function (post) {
+            return post && post.title && safeUrl(post.url);
+          });
+          if (!posts.length) throw new Error("No posts");
+          return posts;
         });
-        if (!posts.length) throw new Error("No posts");
+    }
 
+    // Live posts come from the Cloudflare Worker; the snapshot in data/posts.json
+    // covers the Worker being down.
+    load(src)
+      .catch(function (error) {
+        if (!fallback) throw error;
+        return load(fallback);
+      })
+      .then(function (posts) {
         container.innerHTML = posts
           .slice(0, limit)
           .map(function (post, index) {

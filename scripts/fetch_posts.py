@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 """Fetch Tom's latest Substack posts and write them to site/data/posts.json.
 
-Substack's RSS feed doesn't send CORS headers, so the browser can't read it
-directly. This runs in the deploy workflow (and can be run locally) to turn the
-feed into a small JSON file the homepage reads.
+The homepage gets its posts live from a Cloudflare Worker. This file is the
+fallback for when the Worker is down. Run this locally and commit the result -
+Substack blocks requests from GitHub Actions, so it can't run there.
 
 Only the title, teaser, date, cover image and link are kept - the full post
 always lives on Substack.
 
-If the feed can't be fetched or parsed, the existing posts.json is left alone
-so a Substack outage never breaks a deploy.
+If the feed can't be fetched or parsed, the existing posts.json is left alone.
 """
 
 import email.utils
